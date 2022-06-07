@@ -29,14 +29,16 @@ def truncate_decimal_places(value: decimal.Decimal, places: int = 1) -> float:
 
     NB: Takes a decimal but returns a float!
 
-    >>> truncate_decimal_places(12.364, 1)
+    >>> truncate_decimal_places(decimal.Decimal('12.364'), 1)
     12.3
 
-    >>> round_decimal_places(-12.364, 1)
-    -12.3 # -12.3 is bigger than -12.4
+    >>> truncate_decimal_places(decimal.Decimal('-12.364'), 1)
+    -12.3
 
-    >>> round_decimal_places(12.364, 0)
-    12.0 # rounding to 0 returns float with no decmial part
+    Rounding to zero returns a float with no decimal part:
+
+    >>> truncate_decimal_places(decimal.Decimal('12.364'), 0)
+    12.0
     """
 
     if places == 0:
@@ -56,17 +58,19 @@ def round_decimal_places(
     Round a decimal to a given number of decimal places using a given rounding method.
 
     By default, we use half-up rounding so that parts from half way between the given rounding
-    precision will be rounded up towards the greater number.
+    precision will be rounded up away from zero.
 
     This differs from the default rounding since Python 3.0 which is also used elsewhere in Kraken
     (which use "banker's"/half-even rounding, which is considered by IEEE 754 to be the recommended
     default for decimal).
 
-    >>> round_decimal_places(12.35, 1)
-    12.4
+    For example:
 
-    >>> round_decimal_places(-12.35, 1)
-    -12.3 #-12.3 is bigger than -12.4
+    >>> round_decimal_places(decimal.Decimal('12.35'), 1)
+    Decimal('12.4')
+
+    >>> round_decimal_places(decimal.Decimal('-12.35'), 1)  # note: -12.3 > -12.4
+    Decimal('-12.4')
     """
 
     if places == 0:
@@ -102,10 +106,12 @@ def clip_to_range(
     Values to be compared must be of the same type.
 
     Example usage:
+
         >>> clip_to_range(10, minval=20, maxval=25)
         20
+        >>> from datetime import date
         >>> clip_to_range(date(2020, 1, 4), minval=date(2020, 1, 1), maxval=date(2020, 1, 3))
-        date(2020, 1, 3)
+        datetime.date(2020, 1, 3)
         >>> clip_to_range(1.5, minval=1.0, maxval=2.0)
         1.5
     """
@@ -131,7 +137,7 @@ def random_int(length: int) -> int:
     """
     Return a pseudo-random integer based on the provided `length`.
 
-        >>> random_int(3)
+        >>> random_int(3) # doctest: +SKIP
         114
     """
     if length < 2:

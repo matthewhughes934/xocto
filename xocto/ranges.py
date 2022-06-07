@@ -51,7 +51,7 @@ class Range(Generic[T]):
         <Range: [0,2]>
         >>> r = Range(0, 2)
         >>> print(f"{r}")
-        "[0,2)"
+        [0,2)
 
     * If an endpoint is set as None, then that means that the range is effectively infinite.
       Infinite ranges must have exclusive bounds for the infinite ends. We provide the continuum
@@ -59,15 +59,18 @@ class Range(Generic[T]):
       helper to get an unbounded range.
 
         >>> Range(0, None)
-        <Range: [0, None)
-        >>> Range(0, None, boundaries="[]")  # Invalid
+        <Range: [0,None)>
         >>> Range.continuum()  # Helper function
-        <Range: (None, None)>
+        <Range: (None,None)>
+        >>> Range(0, None, boundaries="[]")  # Invalid
+        Traceback (most recent call last):
+            ...
+        ValueError: Ranges with unbounded ends must be right-inclusive
 
     * Ranges can be declared for any comparable type
 
         >>> int_erval: Range[int] = Range(0, 2)
-        >>> date_erval: Range[date] = Range(date(2020, 1, 1), date(2020, 6, 6))
+        >>> date_erval: Range[datetime.date] = Range(datetime.date(2020, 1, 1), datetime.date(2020, 6, 6))
         >>> string_erval: Range[str] = Range("ardvark", "zebra")  # Uses lexical ordering
 
     * Ranges are themselves comparable. Two ranges are ordered by their start, with their end used
@@ -75,10 +78,10 @@ class Range(Generic[T]):
 
         >>> sorted([Range(1, 4), Range(0, 5)])
         [<Range: [0,5)>, <Range: [1,4)>]
-        >>> sorted([Range(1, 2), Range(None, 2)])
-        [<Range: [None,2)>, <Range: [1,2)>]
+        >>> sorted([Range(1, 2), Range(None, 2, boundaries="()")])
+        [<Range: (None,2)>, <Range: [1,2)>]
         >>> sorted([Range(3, 5), Range(3, 4)])
-        [<Range: [3,4)>, <Range: [4,5)>]
+        [<Range: [3,4)>, <Range: [3,5)>]
         >>> sorted([Range(0, 2, boundaries=b) for b in RangeBoundaries])
         [<Range: [0,2)>, <Range: [0,2]>, <Range: (0,2)>, <Range: (0,2]>]
 
@@ -89,7 +92,7 @@ class Range(Generic[T]):
         True
         >>> 2 in Range(0, 2)
         False
-        >>> date(2020, 1, 1) in Range(date(2020, 1, 2), date(2020, 1, 5))
+        >>> datetime.date(2020, 1, 1) in Range(datetime.date(2020, 1, 2), datetime.date(2020, 1, 5))
         False
 
     * The `intersection` function (which is aliased to the and (&) operator) will return the
@@ -97,7 +100,6 @@ class Range(Generic[T]):
         >>> Range(0, 2).intersection(Range(1, 4))
         <Range: [1,2)>
         >>> Range(1, 2) & Range(3, 4)
-        None
 
     * The `is_disjoint` function will tell you if two ranges are disjoint
         >>> Range(0, 2).is_disjoint(Range(3, 5))
@@ -111,10 +113,8 @@ class Range(Generic[T]):
         <Range: [0,3)>
         >>> Range(0, 2) | Range(2, 4)
         <Range: [0,4)>
-        >>> Range(0, 2) | Range(3, 4)
-        None
+        >>> Range(0, 2) | Range(3, 4)  # None
         >>> Range(0, 2) | Range(2, 4, boundaries="(]")
-        None
 
     * The `difference` function (which is aliased to the subtraction (-) operator), will return a
       range which contains the bit of this range which is not covered by the other range, or a
@@ -125,7 +125,6 @@ class Range(Generic[T]):
         >>> Range(0, 4) - Range(2, 3)
         <RangeSet: {[0,2), [3,4)}>
         >>> Range(0, 4) - Range(0, 5)
-        None
     """
 
     __slots__ = [
@@ -470,7 +469,7 @@ class RangeSet(Generic[T]):
         <RangeSet: {}>
         >>> rs = RangeSet([Range(0, 1), Range(2, 4)])  # Single iterable of ranges
         >>> print(f"{rs}")
-        "{[0,1), [2, 4)}"
+        {[0,1), [2,4)}
 
     Overlapping Ranges are condensed when they are added to a set:
 

@@ -367,8 +367,9 @@ def quantise(
 
     For example:
 
-        >>>> quantise(datetime.datetime(2020, 4, 1, 23, 21), timedelta(minutes=15))
-        datetime.datetime(2020, 4, 1, 23, 30)
+        >>> from datetime import timedelta, timezone
+        >>> quantise(datetime(2020, 4, 1, 23, 23), timedelta(minutes=15))
+        datetime.datetime(2020, 4, 1, 23, 30, tzinfo=...)
 
     """
     # We simply convert the datetime we want to quantise into a timestamp and use
